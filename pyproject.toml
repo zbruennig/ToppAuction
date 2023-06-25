@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "ToppAuction"
 version = "0.1.0"
-description = "This flask boilerplate was written to help make it easy to iterate on your startup/indiehacker business, thereby increasing your chances of success."
-authors = ["Nuvic"]
+description = "WhatNot auction advisor"
+authors = ["Zach Bruennig"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "3.10"
 Flask-Login = "^0.6.2"
 Flask = "^2.2.3"
 bleach = "^6.0.0"

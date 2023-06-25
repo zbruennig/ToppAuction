@@ -1,6 +1,11 @@
-# flask_for_startups
+# ToppAuction
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+### Whatnot Auctioneering Helper
+
+---
+
+### Readme from the Boilerplate:
 
 This flask boilerplate was written to help make it easy to iterate on your startup/indiehacker business, thereby increasing your chances of success.
 
