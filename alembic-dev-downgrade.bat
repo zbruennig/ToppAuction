@@ -1,0 +1,1 @@
+alembic -x db=dev downgrade base
