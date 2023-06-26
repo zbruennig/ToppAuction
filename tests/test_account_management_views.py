@@ -79,11 +79,12 @@ def test_register_service_requires_email(client, db, user_details):
 
     assert response.status_code == 422
 
-    email_error_response = response.json["errors"]["field_errors"]["email"][0]
-    assert email_error_response == "Field may not be null."
+    errors = response.json["errors"]["field_errors"]
+    email_error_msg = [e['msg'] for e in errors if e['loc'][0] == 'email'][0]
+    assert email_error_msg == "none is not an allowed value"
 
-    password_error_response = response.json["errors"]["field_errors"]["password"][0]
-    assert password_error_response == "Field may not be null."
+    password_error_msg = [error['msg'] for error in errors if error['loc'][0] == 'password'][0]
+    assert password_error_msg == "none is not an allowed value"
 
 
 def test_login_success(client, existing_user, user_details):

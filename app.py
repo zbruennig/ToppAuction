@@ -17,6 +17,7 @@ if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
 
+print("BCDE")
 app = create_app(os.getenv("FLASK_CONFIG") or "dev")
 
 

@@ -43,7 +43,7 @@ def load_logs(app):
     return
 
 
-def create_app(config_name):
+def create_app(config_name: str = "dev"):
     app = Flask(__name__)
     app.config.from_object(config_manager[config_name])
 
