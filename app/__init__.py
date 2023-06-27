@@ -54,8 +54,8 @@ def create_app(config_name: str = "dev"):
 
     db_manager.init_app(app)
 
-    from . import routes
-    app.register_blueprint(routes.bp)
+    from app.api.blueprint import blueprint
+    app.register_blueprint(blueprint, url_prefix="/api/v1")
 
     if not app.debug and not app.testing:
         load_logs(app)

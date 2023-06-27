@@ -64,7 +64,7 @@ class Box(Base):
     id: int = Column(Integer, nullable=False, primary_key=True, autoincrement=True)
     set_id: int = Column(Integer, ForeignKey("mlb_sets.id"), nullable=False)
 
-    name: str = Column(String, nullable=False)
+    name: str = Column(String, nullable=False, unique=True)
     total_cards: int = Column(Integer, nullable=False)
     number_of_packs: int = Column(Integer, nullable=False)
 

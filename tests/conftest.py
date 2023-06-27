@@ -11,7 +11,7 @@ import bcrypt
 
 # App imports
 from app import create_app, db_manager
-from app.mlb_models import Base, User, Account
+from app.mlb_models import Base
 
 
 @pytest.fixture(scope="session")
@@ -49,7 +49,6 @@ def _connection(app):
     connection.close()
 
 
-# Session = scoped_session(sessionmaker())
 @pytest.fixture(scope="session")
 def _scoped_session(app):
     Session = scoped_session(sessionmaker())
@@ -94,33 +93,3 @@ def db(_connection, _scoped_session, request):
     request.addfinalizer(teardown)
 
     yield db_manager
-
-
-@pytest.fixture()
-def user_details():
-    class UserDetails(object):
-        test_username = "test_user"
-        test_email = "test@email.com"
-        test_password = "my_secure_password"
-
-    return UserDetails
-
-
-@pytest.fixture()
-def existing_user(db, user_details):
-    account_model = Account()
-    db.session.add(account_model)
-    db.session.flush()
-
-    hash = bcrypt.hashpw(user_details.test_password.encode(), bcrypt.gensalt())
-    password_hash = hash.decode()
-
-    user_model = User(
-        username=user_details.test_username,
-        password_hash=password_hash,
-        email=user_details.test_email,
-        account_id=account_model.account_id,
-    )
-    db.session.add(user_model)
-    db.session.commit()
-    return user_model
