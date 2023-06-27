@@ -13,7 +13,7 @@ from .views import (
     account_management_views,
     static_views,
 )
-from .models import User
+from .mlb_models import User
 
 bp = Blueprint('routes', __name__)
 

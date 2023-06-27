@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 # App imports
 from app import create_app, db_manager
-from app.models import Account, User, Role, UserRole
+from app.mlb_models import Account, User, Role, UserRole
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")

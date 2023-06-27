@@ -7,7 +7,7 @@ import bcrypt
 
 # App imports
 from app import db_manager as db
-from ..models import User, Account
+from ..mlb_models import User, Account
 from ..utils import custom_errors
 from ..utils.validators import AccountValidator, EmailValidator
 

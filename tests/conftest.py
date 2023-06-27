@@ -11,7 +11,7 @@ import bcrypt
 
 # App imports
 from app import create_app, db_manager
-from app.models import Base, User, Account
+from app.mlb_models import Base, User, Account
 
 
 @pytest.fixture(scope="session")

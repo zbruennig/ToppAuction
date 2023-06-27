@@ -67,7 +67,7 @@ cwd = os.getcwd()
 sys.path.append(cwd)
 
 # App imports
-from app.models import Base
+from app.mlb_models import Base
 
 target_metadata = Base.metadata
 
