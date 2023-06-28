@@ -2,22 +2,18 @@
 from decimal import Decimal
 
 # Core Flask imports
-from flask_login import UserMixin
 
 # Third-party imports
 from sqlalchemy import (
     Integer,
     Float,
     Column,
-    Text,
     String,
     Boolean,
     Numeric,
     DateTime,
     ForeignKey,
-    func,
 )
-from sqlalchemy.orm import relationship
 
 # App imports
 from app import db_manager
@@ -26,19 +22,15 @@ from app import db_manager
 Base = db_manager.base
 
 
-class Account(Base):
-    __tablename__ = "accounts"
-    account_id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, server_default=func.now())
-    users = relationship("User", back_populates="account")
-
-
 class Team(Base):
     __tablename__ = "mlb_teams"
     id: int = Column(Integer, nullable=False, primary_key=True, autoincrement=True)
 
     abbreviation: str = Column(String, nullable=False, unique=True)
     name: str = Column(String, nullable=False, unique=True)
+
+    def __repr__(self):
+        return f"<Team {self.abbreviation} - {self.name}>"
 
 
 class Player(Base):
@@ -49,6 +41,9 @@ class Player(Base):
     name: str = Column(String, nullable=False)
     position: str = Column(String, nullable=True)
 
+    def __repr__(self):
+        return f"<Player {self.id} - {self.name}>"
+
 
 class CardSet(Base):
     __tablename__ = "mlb_sets"
@@ -57,6 +52,9 @@ class CardSet(Base):
     name: str = Column(String, nullable=False, unique=True)
     year: int = Column(Integer, nullable=False)
     series: int = Column(Integer, nullable=True)
+
+    def __repr__(self):
+        return f"<CardSet {self.name}>"
 
 
 class Box(Base):
@@ -68,25 +66,34 @@ class Box(Base):
     total_cards: int = Column(Integer, nullable=False)
     number_of_packs: int = Column(Integer, nullable=False)
 
+    def __repr__(self):
+        return f"<Box {self.name}>"
+
 
 class BoxHistory(Base):
     __tablename__ = "mlb_box_history"
     id: int = Column(Integer, nullable=False, primary_key=True, autoincrement=True)
     box_id: int = Column(Integer, ForeignKey("mlb_boxes.id"), nullable=False)
 
-    price: Decimal = Column(Numeric, server_default="0.00")
+    price: Decimal = Column(Numeric, nullable=False)
 
     source: str = Column(String, nullable=True)
     modified_by: str = Column(String, nullable=True)
     effective_from: str = Column(DateTime, nullable=False)
 
+    def __repr__(self):
+        return f"<BoxHistory {self.id}>"
+
 
 class Pack(Base):
     __tablename__ = "mlb_packs"
     id: int = Column(Integer, nullable=False, primary_key=True, autoincrement=True)
-    box_id: int = Column(Integer, ForeignKey("mlb_boxes.id"), nullable=False)
+    box_id: int = Column(Integer, ForeignKey("mlb_boxes.id"), nullable=False, unique=True)
 
     number_of_cards: int = Column(Integer, nullable=False)
+
+    def __repr__(self):
+        return f"<Pack {self.id}>"
 
 
 class CardType(Base):
@@ -99,6 +106,9 @@ class CardType(Base):
     is_numbered: bool = Column(Boolean, nullable=False)
     numbered_to: int = Column(Integer, nullable=True)
 
+    def __repr__(self):
+        return f"<CardType {self.description}>"
+
 
 class BoxDistribution(Base):
     __tablename__ = "mlb_box_distribution"
@@ -108,6 +118,9 @@ class BoxDistribution(Base):
 
     odds: float = Column(Float, nullable=False)
 
+    def __repr__(self):
+        return f"<BoxDistribution {self.id}>"
+
 
 class Card(Base):
     __tablename__ = "mlb_cards"
@@ -116,10 +129,13 @@ class Card(Base):
     set_id: int = Column(Integer, ForeignKey("mlb_sets.id"), nullable=False)
     card_type_id: int = Column(Integer, ForeignKey("mlb_card_types.id"), nullable=True)
 
-    full_description: str = Column(String, nullable=True)
+    full_description: str = Column(String, nullable=True, unique=True)
     is_rookie: bool = Column(Boolean, nullable=True)
     is_numbered: bool = Column(Boolean, nullable=False)
     numbered_to: int = Column(Integer, nullable=True)
+
+    def __repr__(self):
+        return f"<Card {self.id}>"
 
 
 class CardHistory(Base):
@@ -127,11 +143,14 @@ class CardHistory(Base):
     id: int = Column(Integer, nullable=False, primary_key=True, autoincrement=True)
     card_id: int = Column(Integer, ForeignKey("mlb_cards.id"), nullable=False)
 
-    value: Decimal = Column(Numeric, server_default="0.00")
+    value: Decimal = Column(Numeric, nullable=False)
 
     source: str = Column(String, nullable=True)
     modified_by: str = Column(String, nullable=True)
     effective_from: str = Column(DateTime, nullable=False)
+
+    def __repr__(self):
+        return f"<CardHistory {self.id}>"
 
 
 class PhysicalCard(Base):
@@ -140,37 +159,5 @@ class PhysicalCard(Base):
     card_id: int = Column(Integer, ForeignKey("mlb_cards.id"), nullable=False)
     grade: int = Column(Integer, nullable=True)
 
-
-class Role(Base):
-    __tablename__ = "roles"
-    role_id = Column(Integer, primary_key=True)
-    name = Column(Text, nullable=False)
-
     def __repr__(self):
-        return f"<Role {self.name}>"
-
-
-class UserRole(Base):
-    __tablename__ = "users_x_roles"
-    user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
-    role_id = Column(Integer, ForeignKey("roles.role_id"), primary_key=True)
-    assigned_at = Column(DateTime, nullable=False, server_default=func.now())
-
-
-class User(UserMixin, Base):
-    __tablename__ = "users"
-    user_id = Column(Integer, primary_key=True)
-    username = Column(Text)
-    email = Column(String, nullable=False, unique=True)
-    password_hash = Column(String(128), nullable=False)
-    confirmed = Column(Boolean, nullable=False, server_default="false")
-    created_at = Column(DateTime, nullable=False, server_default=func.now())
-    account_id = Column(Integer, ForeignKey("accounts.account_id"), nullable=False)
-    account = relationship("Account", back_populates="users")
-    roles = relationship("Role", secondary="users_x_roles")
-
-    def get_id(self):
-        return self.user_id
-
-    def __repr__(self):
-        return f"<User {self.email}>"
+        return f"<PhysicalCard {self.id}>"

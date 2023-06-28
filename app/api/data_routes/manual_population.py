@@ -1,32 +1,33 @@
+import logging
+
 from flask import request
 from flask_restful import Resource
 
-from typing import List
-from json import dumps
+from collections import namedtuple
 
-from app.api.util import post_response
-from app.mlb_models import Team
-from app.persistence.inserts import insert_teams
+from app.api.util import captures_fails, process_items
+from app.persistence.inserts import insert_rows
 from app.services.orm_serializer import json_to_team
-class PopulateTeams(Resource):
-    post_url = "/manual/teams"
 
-    def post(self):
-        # Handle singular and lists
-        body = request.json if isinstance(request.json, list) else [request.json]
+logger = logging.getLogger(__name__)
 
-        teams: List[Team] = []
-        failures = []
-        for json in body:
-            try:
-                team = json_to_team(json)
-                teams.append(team)
-            except Exception as e:
-                # TODO proper logging
-                print(f"Could not parse Team: {dumps(json)}")
-                failures.append(json)
-        insert_teams(teams)
+Functions = namedtuple("Functions", ["convert", "insert"])
 
-        if failures:
-            return post_response(f"Could not insert the following records: {dumps(failures)}", 200)
-        return post_response("All records successfully added", 200)
+
+class PopulateTable(Resource):
+    post_url = "/manual/<string:table>"
+
+
+    def conversion_function(self, table_name):
+        return {
+            "teams": json_to_team
+        }[table_name.lower()]
+
+    @captures_fails()
+    def post(self, table: str):
+        orm_serializer = self.conversion_function(table)
+        # Handle both singular and lists as lists
+        jsons = request.json if isinstance(request.json, list) else [request.json]
+        models, failures = process_items(jsons, orm_serializer)
+        insert_rows(models)
+        return failures

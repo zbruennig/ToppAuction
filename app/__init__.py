@@ -19,6 +19,10 @@ login_manager = LoginManager()
 db_manager = DatabaseManager()
 
 
+def get_session():
+    return db_manager.session
+
+
 def load_logs(app):
     if app.config["LOG_TO_STDOUT"]:
         stream_handler = logging.StreamHandler()

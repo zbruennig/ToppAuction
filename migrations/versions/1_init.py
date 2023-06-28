@@ -20,11 +20,8 @@ def upgrade():
     op.create_table(  # there's 30 of these
         "mlb_teams",
         sa.Column("id", sa.Integer(), nullable=False, autoincrement=True, primary_key=True),
-        sa.Column("abbreviation", sa.String(), nullable=False),  # BOS
-        sa.Column("name", sa.String(), nullable=False),  # Boston Red Sox
-
-        sa.UniqueConstraint("name"),
-        sa.UniqueConstraint("abbreviation"),
+        sa.Column("abbreviation", sa.String(), nullable=False, unique=True),  # BOS
+        sa.Column("name", sa.String(), nullable=False, unique=True),  # Boston Red Sox
     )
     op.create_index("ix_mlb_teams_1", "mlb_teams", ["abbreviation", "name"])
 
@@ -40,11 +37,9 @@ def upgrade():
     op.create_table(  # One complete collection of cards, distributed through many boxes
         "mlb_sets",
         sa.Column("id", sa.Integer(), nullable=False, autoincrement=True, primary_key=True),
-        sa.Column("name", sa.Integer(), nullable=False),  # full name e.g. Topps 2023 Series 1
+        sa.Column("name", sa.Integer(), nullable=False, unique=True),  # full name e.g. Topps 2023 Series 1
         sa.Column("year", sa.Integer(), nullable=False),
         sa.Column("series", sa.Integer(), nullable=True),
-
-        sa.UniqueConstraint("name")
     )
     op.create_index("ix_mlb_sets_1", "mlb_sets", ["name", "year", "series"])
 
@@ -52,12 +47,10 @@ def upgrade():
         "mlb_boxes",
         sa.Column("id", sa.Integer(), nullable=False, autoincrement=True, primary_key=True),
         sa.Column("set_id", sa.Integer(), sa.ForeignKey("mlb_sets.id")),
-        sa.Column("name", sa.String(), nullable=False),  # e.g. 2023 Topps Baseball Series 2 - Jumbo Box
+        sa.Column("name", sa.String(), nullable=False, unique=True),  # e.g. 2023 Topps Baseball Series 2 - Jumbo Box
 
         sa.Column("total_cards", sa.Integer(), nullable=False),
         sa.Column("number_of_packs", sa.Integer(), nullable=False),
-
-        sa.UniqueConstraint("name")
     )
     op.create_index("ix_mlb_boxes_1", "mlb_boxes", ["set_id", "name"])
 
@@ -66,7 +59,7 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False, autoincrement=True, primary_key=True),
         sa.Column("box_id", sa.Integer(), sa.ForeignKey("mlb_boxes.id"), nullable=False),
 
-        sa.Column("price", sa.Numeric(10, 2), server_default=sa.text("0.00")),
+        sa.Column("price", sa.Numeric(10, 2), nullable=False),
         sa.Column("source", sa.String(), nullable=True),  # from website, manual input, etc.
         sa.Column("modified_by", sa.String(), nullable=True),  # user who manually updated, probably
         sa.Column("effective_from", sa.DateTime(), nullable=False),
@@ -78,7 +71,7 @@ def upgrade():
     op.create_table(  # a box has several packs of cards, these things are in shiny plastic
         "mlb_packs",
         sa.Column("id", sa.Integer(), nullable=False, autoincrement=True, primary_key=True),
-        sa.Column("box_id", sa.Integer(), sa.ForeignKey("mlb_boxes.id"), nullable=False),
+        sa.Column("box_id", sa.Integer(), sa.ForeignKey("mlb_boxes.id"), nullable=False, unique=True),
         sa.Column("number_of_cards", sa.Integer(), nullable=False),
     )
     op.create_index("ix_mlb_packs_1", "mlb_packs", ["box_id"])
@@ -118,7 +111,7 @@ def upgrade():
         sa.Column("set_id", sa.Integer(), sa.ForeignKey("mlb_sets.id"), nullable=False),
         sa.Column("card_type_id", sa.Integer(), sa.ForeignKey("mlb_card_types.id"), nullable=True),
 
-        sa.Column("full_description", sa.String(), nullable=True),  # possibly used for display or price lookup
+        sa.Column("full_description", sa.String(), nullable=True, unique=True),  # possibly used for display or price lookup
 
         sa.Column("is_rookie", sa.Boolean(), nullable=True),  # has RC on card
         sa.Column("is_numbered", sa.Boolean(), nullable=False),  # limited edition or not
@@ -132,7 +125,7 @@ def upgrade():
         sa.Column("card_id", sa.Integer(), sa.ForeignKey("mlb_cards.id"), nullable=False),
 
         # check resale sources, or manual input
-        sa.Column("value", sa.Numeric(10, 2), server_default=sa.text("0.00")),
+        sa.Column("value", sa.Numeric(10, 2), nullable=False),
         sa.Column("source", sa.String(), nullable=True),  # from website, manual input, etc.
         sa.Column("modified_by", sa.String(), nullable=True),  # user who manually updated, probably
         sa.Column("effective_from", sa.DateTime(), nullable=False),

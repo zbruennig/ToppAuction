@@ -1,6 +1,6 @@
 from functools import wraps
 
-from app import db_manager as db
+from app import get_session
 
 
 def insert_result():
@@ -9,10 +9,10 @@ def insert_result():
         def decorated(*args, **kwargs):
             inserts = f(*args, **kwargs)
             if isinstance(inserts, list):
-                db.session.bulk_save_objects(inserts)
+                get_session().bulk_save_objects(inserts)
             else:
-                db.session.add(inserts)
-            db.session.commit()
+                get_session().add(inserts)
+            get_session().commit()
 
         return decorated
     return decorator
